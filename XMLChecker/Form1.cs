@@ -160,8 +160,7 @@ namespace XMLChecker
 
             if (DateTime.Now >= time_check)
             {
-
-                textBox1.Text = ""; if(t!=null)if(t.Enabled) t.Stop();
+                textBox1.Text = ""; if(t!=null)if( t.Enabled ) t.Stop();
                 foreach (XmlNode node in xdocument.DocumentElement.ChildNodes)
                 {
                     if (node.Name != "xml" && node.Name != "updatetime")
