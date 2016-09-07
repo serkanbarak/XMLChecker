@@ -159,21 +159,27 @@ namespace XMLChecker
             } // foreach
 
             if (DateTime.Now >= time_check)
-             foreach (XmlNode node in xdocument.DocumentElement.ChildNodes)
+            {
+                textBox1.Text = ""; if( t.Enabled ) t.Stop();
+                foreach (XmlNode node in xdocument.DocumentElement.ChildNodes)
                 {
-                    string node2str = "";
-                    foreach (XmlNode node2 in node.ChildNodes)
+                    if (node.Name != "xml" && node.Name != "updatetime")
                     {
-                        if (node2.Attributes["type"]?.InnerText == "string")
-                            node2str += "'" + node2.InnerText + "',";
-                        else
-                            node2str += node2.InnerText + ",";
+                        string node2str = "";
+                        foreach (XmlNode node2 in node.ChildNodes)
+                        {
+                            if (node2.Attributes["type"]?.InnerText == "string")
+                                node2str += "'" + node2.InnerText + "',";
+                            else
+                                node2str += node2.InnerText + ",";
+                        }
+                        node2str = node2str.TrimEnd(',');
+                        str = "INSERT INTO catalog (name, code, price, interest) VALUES (" + node2str + ");";
+                        myCommand = new SqlCommand(str, conn);
+                        myCommand.ExecuteNonQuery();
                     }
-                    node2str = node2str.TrimEnd(',');
-                    str = "INSERT INTO catalog (name, code, price, interest) VALUES (" + node2str + ");";
-                    myCommand = new SqlCommand(str, conn);
-                    myCommand.ExecuteNonQuery();
                 }
+            }
             else
             {
                 // TIMER BASLATILACAK
