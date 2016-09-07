@@ -128,6 +128,8 @@ namespace XMLChecker
 ;
         }
 
+        private DateTime time_check;
+
         private void XMLRecreate(int method_selector)
         {
             XmlDocument xdocument = new XmlDocument();
@@ -145,24 +147,38 @@ namespace XMLChecker
             conn.Open();
             myCommand.ExecuteNonQuery();
 
-
+            
+            
             foreach (XmlNode node in xdocument.DocumentElement.ChildNodes)
             {
-               
-                string node2str = "";
-                foreach (XmlNode node2 in node.ChildNodes)
-                {
-                    if (node2.Attributes["type"]?.InnerText == "string")
-                        node2str += "'" + node2.InnerText + "',";
-                    else
-                        node2str += node2.InnerText + ",";
-                }
-                node2str = node2str.TrimEnd(',');
-                str = "INSERT INTO catalog (name, code, price, interest) VALUES (" + node2str + ");";
-                myCommand = new SqlCommand(str, conn);
-                myCommand.ExecuteNonQuery();
+                if (node.Name == "updatetime")
+                    if (node.InnerText == "Now") time_check = DateTime.Now;
+                    else time_check = DateTime.Parse(node.InnerText);
+                
 
             } // foreach
+
+            if (DateTime.Now >= time_check)
+             foreach (XmlNode node in xdocument.DocumentElement.ChildNodes)
+                {
+                    string node2str = "";
+                    foreach (XmlNode node2 in node.ChildNodes)
+                    {
+                        if (node2.Attributes["type"]?.InnerText == "string")
+                            node2str += "'" + node2.InnerText + "',";
+                        else
+                            node2str += node2.InnerText + ",";
+                    }
+                    node2str = node2str.TrimEnd(',');
+                    str = "INSERT INTO catalog (name, code, price, interest) VALUES (" + node2str + ");";
+                    myCommand = new SqlCommand(str, conn);
+                    myCommand.ExecuteNonQuery();
+                }
+            else
+            {
+                // TIMER BASLATILACAK
+                StartTimer();
+            }
 
             conn.Close();
         }
@@ -186,12 +202,8 @@ namespace XMLChecker
             myMethod(1);
         }
 
-        private void button2_Click(object sender, EventArgs e)
-        {
-            textBox1.Text = "3600";
-            StartTimer();
-        }
-            System.Windows.Forms.Timer t = null;
+        
+        System.Windows.Forms.Timer t = null;
         
         private void StartTimer()
         {
@@ -200,6 +212,9 @@ namespace XMLChecker
            
             t.Tick += new EventHandler(t_Tick);
             t.Enabled = true;
+            double time_span = (time_check - DateTime.Now).TotalSeconds;
+            textBox1.Text = ((int)(time_span)).ToString();
+            ;
         }
 
         void t_Tick(object sender, EventArgs e)
@@ -214,8 +229,10 @@ namespace XMLChecker
                 textBox1.Text = (int.Parse(textBox1?.Text) - 1).ToString();
         }
 
-        
-
+        private void button2_Click(object sender, EventArgs e)
+        {
+            myMethod(2);
+        }
     }
 
 
