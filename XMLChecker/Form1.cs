@@ -62,7 +62,7 @@ namespace XMLChecker
             else
             {
                 // Update yapilacak
-                SQLClear();
+
                 XMLRecreate(method_selector);
             }
 
@@ -138,14 +138,7 @@ namespace XMLChecker
             else
                 xdocument.Load("http://www.serkanbarak.com/XMLFile2.xml");
 
-            SqlConnection conn = new SqlConnection("Server=.\\SQLEXPRESS;Database=fruits;Trusted_Connection=True");
-
-            string str = "CREATE TABLE catalog( name TEXT, code INTEGER, price INTEGER, interest REAL );";
-
-            SqlCommand myCommand = new SqlCommand(str, conn);
-
-            conn.Open();
-            myCommand.ExecuteNonQuery();
+            
 
             
             
@@ -160,6 +153,17 @@ namespace XMLChecker
 
             if (DateTime.Now >= time_check)
             {
+                SQLClear();
+
+                SqlConnection conn = new SqlConnection("Server=.\\SQLEXPRESS;Database=fruits;Trusted_Connection=True");
+
+                string str = "CREATE TABLE catalog( name TEXT, code INTEGER, price INTEGER, interest REAL );";
+
+                SqlCommand myCommand = new SqlCommand(str, conn);
+
+                conn.Open();
+                myCommand.ExecuteNonQuery();
+
                 textBox1.Text = ""; if(t!=null)if( t.Enabled ) t.Stop();
                 foreach (XmlNode node in xdocument.DocumentElement.ChildNodes)
                 {
@@ -179,6 +183,7 @@ namespace XMLChecker
                         myCommand.ExecuteNonQuery();
                     }
                 }
+                conn.Close();
             }
             else
             {
@@ -186,7 +191,7 @@ namespace XMLChecker
                 StartTimer();
             }
 
-            conn.Close();
+            
         }
 
         private void SQLClear()
@@ -226,10 +231,11 @@ namespace XMLChecker
         void t_Tick(object sender, EventArgs e)
         {
 
-            if (textBox1.Text == "0" || textBox1.Text=="")
+            if (textBox1.Text == "-1" || textBox1.Text=="")
             {
                 myMethod(2);
                 t.Stop();
+                textBox1.Text = "";
             }
             else
                 textBox1.Text = (int.Parse(textBox1?.Text) - 1).ToString();
