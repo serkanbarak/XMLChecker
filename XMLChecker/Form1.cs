@@ -21,7 +21,7 @@ namespace XMLChecker
             
         {
             InitializeComponent();
-            SQLRead();
+            
         }
 
         private void myMethod(int method_selector)
@@ -132,6 +132,8 @@ namespace XMLChecker
 
         private void SQLRead()
         {
+
+
             //XmlDocument xdocument = new XmlDocument();
             //xdocument.Load("http://www.serkanbarak.com/XMLFile1.xml");
 
@@ -192,10 +194,16 @@ namespace XMLChecker
 
         private void XMLRecreate(int method_selector)
         {
-
             XmlDocument xdocument2 = new XmlDocument();
-            xdocument2.Load("savedxml.xml");
-
+            if (File.Exists("savedxml.xml"))
+            {
+                
+                xdocument2.Load("savedxml.xml");
+            }
+            else
+            {
+                xdocument2.Load("http://www.serkanbarak.com/XMLFile2.xml");
+            }
 
             foreach (XmlNode node in xdocument2.DocumentElement.ChildNodes)
             {
@@ -208,6 +216,7 @@ namespace XMLChecker
 
             if (DateTime.Now >= time_check)
             {
+
                 SQLClear();
 
                 SqlConnection conn = new SqlConnection("Server=.\\SQLEXPRESS;Database=fruits;Trusted_Connection=True");
@@ -239,6 +248,7 @@ namespace XMLChecker
                     }
                 }
                 conn.Close();
+                if(File.Exists("savedxml.xml"))
                 File.Delete("savedxml.xml");
 
 
@@ -258,13 +268,16 @@ namespace XMLChecker
             // CAPRAZ KONTROL DAHA UZUN SURER. SQL DATABASE'I SIFIRLAYIP TEKRARDAN TABLO OLUSTURULACAK.
             SqlConnection conn = new SqlConnection("Server=.\\SQLEXPRESS;Database=fruits;Trusted_Connection=True");
 
-            string str = "DROP TABLE catalog;";
+            string str = "IF OBJECT_ID('catalog', 'U') IS NOT NULL DROP TABLE catalog ; ";
 
             SqlCommand myCommand = new SqlCommand(str, conn);
 
             conn.Open();
-            myCommand.ExecuteNonQuery();
-            conn.Close();
+            
+                myCommand.ExecuteNonQuery();
+            
+                conn.Close();
+            
         }
 
         private void button1_Click(object sender, EventArgs e)
