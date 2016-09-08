@@ -10,21 +10,33 @@ using System.Windows.Forms;
 using System.Xml;
 using System.Data.SqlClient;
 using System.Data.Odbc;
+using System.IO;
 
 namespace XMLChecker
 {
+    
     public partial class Form1 : Form
     {
         public Form1()
             
         {
             InitializeComponent();
-            
+            SQLRead();
         }
 
         private void myMethod(int method_selector)
         {
-            
+            XmlDocument xdocument = new XmlDocument();
+            if (method_selector == 1)
+                xdocument.Load("http://www.serkanbarak.com/XMLFile1.xml");
+            else
+                xdocument.Load("http://www.serkanbarak.com/XMLFile2.xml");
+
+
+            FileStream fs = File.Create("savedxml.xml");
+            fs.Close();
+            xdocument.Save("savedxml.xml");
+
             // For SQL server connection to work :
             // 1.download https://www.microsoft.com/en-us/download/details.aspx?id=30438
             // 2.start an instance of an SQL server by typing SQLEXPRESS to its name as locally accesible ( 127.0.0.1 )
@@ -69,6 +81,54 @@ namespace XMLChecker
             SQLRead();
 
         }
+
+        private void myMethod2()
+        {
+            // For SQL server connection to work :
+            // 1.download https://www.microsoft.com/en-us/download/details.aspx?id=30438
+            // 2.start an instance of an SQL server by typing SQLEXPRESS to its name as locally accesible ( 127.0.0.1 )
+            SqlConnection conn = new SqlConnection("Server=.\\SQLEXPRESS;Database=;Trusted_Connection=True");
+
+            String str = "CREATE DATABASE fruits";
+            bool exists;
+            SqlCommand myCommand = new SqlCommand(str, conn);
+            try
+            {
+                conn.Open();
+                myCommand.ExecuteNonQuery();
+                exists = false;
+                //MessageBox.Show("DataBase is Created Successfully", "MyProgram", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (System.Exception ex)
+            {
+                exists = true;
+                //MessageBox.Show(ex.ToString(), "MyProgram", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            finally
+            {
+                if (conn.State == ConnectionState.Open)
+                {
+                    conn.Close();
+                }
+            }
+
+            if (!exists)
+            {
+
+                XMLRecreate(2);
+
+            } // if(!exists)
+            else
+            {
+                // Update yapilacak
+
+                XMLRecreate(2);
+            }
+
+            SQLRead();
+
+        
+    }
 
         private void SQLRead()
         {
@@ -132,17 +192,12 @@ namespace XMLChecker
 
         private void XMLRecreate(int method_selector)
         {
-            XmlDocument xdocument = new XmlDocument();
-            if (method_selector == 1)
-                xdocument.Load("http://www.serkanbarak.com/XMLFile1.xml");
-            else
-                xdocument.Load("http://www.serkanbarak.com/XMLFile2.xml");
 
-            
+            XmlDocument xdocument2 = new XmlDocument();
+            xdocument2.Load("savedxml.xml");
 
-            
-            
-            foreach (XmlNode node in xdocument.DocumentElement.ChildNodes)
+
+            foreach (XmlNode node in xdocument2.DocumentElement.ChildNodes)
             {
                 if (node.Name == "updatetime")
                     if (node.InnerText == "Now") time_check = DateTime.Now;
@@ -160,12 +215,12 @@ namespace XMLChecker
                 string str = "CREATE TABLE catalog( name TEXT, code INTEGER, price INTEGER, interest REAL );";
 
                 SqlCommand myCommand = new SqlCommand(str, conn);
-
+               
                 conn.Open();
                 myCommand.ExecuteNonQuery();
 
                 textBox1.Text = ""; if(t!=null)if( t.Enabled ) t.Stop();
-                foreach (XmlNode node in xdocument.DocumentElement.ChildNodes)
+                foreach (XmlNode node in xdocument2.DocumentElement.ChildNodes)
                 {
                     if (node.Name != "xml" && node.Name != "updatetime")
                     {
@@ -184,6 +239,9 @@ namespace XMLChecker
                     }
                 }
                 conn.Close();
+                File.Delete("savedxml.xml");
+
+
             }
             else
             {
@@ -192,6 +250,7 @@ namespace XMLChecker
             }
 
             
+
         }
 
         private void SQLClear()
@@ -233,7 +292,7 @@ namespace XMLChecker
 
             if (textBox1.Text == "-1" || textBox1.Text=="")
             {
-                myMethod(2);
+                myMethod2();
                 t.Stop();
                 textBox1.Text = "";
             }
